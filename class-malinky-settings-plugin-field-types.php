@@ -106,18 +106,20 @@ class Malinky_Settings_Plugin_Field_Types
 
 				$options = get_option($args['option_name']);
 
-				echo '<input type="checkbox" id="' . $args['option_id'] . '" name="' . $args['option_name'] . '[' . $args['option_id'] . '][]" value="' . esc_attr( $value ) . '"' . ( isset($options[$args['option_id']]) && in_array( $value , $options[$args['option_id']] ) ? 'checked' : '' ) . '/>' . esc_html( $value );
+				echo '<input type="checkbox" id="' . $args['option_id'] . '" name="' . $args['option_name'] . '[' . $args['option_id'] . '][]" value="' . esc_attr( $value ) . '"' . ( isset( $options[$args['option_id']] ) && in_array( $value , $options[$args['option_id']] ) ? 'checked' : '' ) . '/>' . esc_html( $value );
 
 			} else {
 
-				echo '<input type="checkbox" id="' . $args['option_id'] . '" name="' . $args['option_name'] . '[]" value="' . esc_attr( $value ) . '"' . ( in_array( $value, get_option( $args['option_name'] ) ) ? 'checked' : '' ) . '/>' . esc_html( $value );
+				//Need to evaluate whether $option exists particular on initial load with setting saved.
+				$option = get_option($args['option_name']);
+
+				echo '<input type="checkbox" id="' . $args['option_id'] . '" name="' . $args['option_name'] . '[]" value="' . esc_attr( $value ) . '"' . ( !empty( $option ) && in_array( $value, get_option( $args['option_name'] ) ) ? 'checked' : '' ) . '/>' . esc_html( $value );
 
 			}
 
 		}
 	
 	}
-
 
 	/**
 	 * Output SELECT OPTIONS.

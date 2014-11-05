@@ -52,6 +52,33 @@ class Malinky_Settings_Plugin_Validation
 
 
 	/**
+	 * Required checkbox field.
+	 *
+	 * @param 	str $input
+	 * @param 	str $saved_input
+	 * @param 	str $option_name
+	 * @param 	str $option_title
+	 * @return 	str   
+	 */
+	public function malinky_settings_validation_required_checkbox($input, $saved_input, $option_name, $option_title)
+	{
+
+		if ( !($input) ) {
+
+			$error_code 	= $option_name . '_' . str_replace('malinky_settings_validation_', '', __FUNCTION__) . '_error';
+			$error_message 	= apply_filters('malinky_settings_validation_error_message_required', 'is required.', $error_code);
+			$this->malinky_settings_add_settings_error($option_name, $option_title, $error_code, $error_message);
+
+			return $saved_input;
+
+		}
+
+		return $input;
+
+	}	
+
+
+	/**
 	 * Letters field.
 	 *
 	 * @param 	str $input

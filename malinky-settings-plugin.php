@@ -120,7 +120,7 @@ class Malinky_Settings_Plugin
 
         //No Trailing Slash.
         if ( ! defined('MALINKY_SETTINGS_PLUGIN_DIR') )
-               define('MALINKY_SETTINGS_PLUGIN_DIR', plugin_dir_path(__FILE__));
+            define('MALINKY_SETTINGS_PLUGIN_DIR', plugin_dir_path(__FILE__));
             
         //No Trailing Slash.
         if ( ! defined('MALINKY_SETTINGS_PLUGIN_URL') )
@@ -131,10 +131,10 @@ class Malinky_Settings_Plugin
         require_once('class-malinky-settings-plugin-field-types.php');
 
         //Instantiate validation object.
-        $this->validator     = new Malinky_Settings_Plugin_Validation();
+        $this->validator    = new Malinky_Settings_Plugin_Validation();
 
         //Instantiate field object.
-        $this->field_types     = new Malinky_Settings_Plugin_Field_Types();        
+        $this->field_types  = new Malinky_Settings_Plugin_Field_Types();        
 
         //Lets go!
         $this->malinky_settings_run($master_args);
@@ -180,6 +180,23 @@ class Malinky_Settings_Plugin
         //Set up sections and fields action.
         add_action( 'admin_init', array($this, 'malinky_settings_section_field_setup') );
 
+        //Add empty values to db options table. This stops double validation error on first load. See Notes section in link below.
+        //http://codex.wordpress.org/Function_Reference/register_setting
+        foreach ($this->all_option_names as $option_name => $option_value) {
+
+            if ( is_array($option_value) ) {
+
+                add_option($option_name, $option_value);
+
+            } else {
+
+                add_option($option_name, '');
+
+            }
+
+        }
+
+
     }
 
 
@@ -194,7 +211,7 @@ class Malinky_Settings_Plugin
     {
 
         $unique_option_names     = array();
-        $prefixed_option_names     = array();
+        $prefixed_option_names   = array();
 
         //Return either option_group_name or option_title in slug format.
         $unique_option_names = $this->malinky_settings_get_option_names($master_args['malinky_settings_fields']);
@@ -553,6 +570,11 @@ class Malinky_Settings_Plugin
         //Get the option_value as saved in DB. Could be an array.
         $saved_value = get_option( $option_name );
 
+        //Check correct inputs are set when dealing with an array of inputs. And add missing checkboxes and radio buttons.
+        $input = $this->malinky_settings_input_whitelist($option_name, $this->all_option_names, $input);
+
+        //var_dump($input); exit;
+
         //---------------------------------------------------------------------
         //If working with a single option_name and option_value
         //---------------------------------------------------------------------
@@ -776,6 +798,54 @@ class Malinky_Settings_Plugin
             return get_option($option_name);
 
         }
+
+    }
+
+
+    /**
+     * Check all inputs exist in an array of inputs.
+     * Checked using the option_name and all_option_names.
+     * Mainly used to add empty checkboxs and radio buttons as they aren't passed in $_POST. And cause validation issues when missing.
+     * Also remove any additonal inputs that may have been maliciously added.
+     * MAY NEED SOME IMPROVEMENT.
+     *
+     * @param     str       $option_name
+     * @param     arr       $all_option_names
+     * @param     arr|str   $option_name
+     * @return    arr  
+     */
+    public function malinky_settings_input_whitelist($option_name, $all_option_names, $input)
+    {
+
+        $option_ids = $all_option_names[$option_name];
+
+        if ( is_array($input) ) {
+
+            //Add missing inputs
+            foreach ( $option_ids as $key => $option_id ) {
+            
+                if ( !array_key_exists($option_id, $input) ) {
+
+                    $input[$option_id] = '';
+
+                }
+
+            }
+
+            //Remove malicious inputs
+            foreach ( $input as $key => $option_id) {
+            
+                if ( !in_array($key, $option_ids) ) {
+
+                    unset($input[$key]);
+
+                }
+
+            }            
+
+        }
+
+        return $input;
 
     }
 
