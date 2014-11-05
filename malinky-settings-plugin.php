@@ -481,6 +481,9 @@ class Malinky_Settings_Plugin
                 break;
             case 'checkbox_field':
                 $this->field_types->malinky_settings_checkbox_field_output($args);
+                break;                
+            case 'checkboxes_field':
+                $this->field_types->malinky_settings_checkboxes_field_output($args);
                 break;
             case 'select_field':
                 $this->field_types->malinky_settings_select_field_output($args);
@@ -570,10 +573,8 @@ class Malinky_Settings_Plugin
         //Get the option_value as saved in DB. Could be an array.
         $saved_value = get_option( $option_name );
 
-        //Check correct inputs are set when dealing with an array of inputs. And add missing checkboxes and radio buttons.
+        //Check correct inputs are set when dealing with an array of inputs. Adds missing checkboxes and radio buttons.
         $input = $this->malinky_settings_input_whitelist($option_name, $this->all_option_names, $input);
-
-        //var_dump($input); exit;
 
         //---------------------------------------------------------------------
         //If working with a single option_name and option_value
@@ -803,11 +804,11 @@ class Malinky_Settings_Plugin
 
 
     /**
-     * Check all inputs exist in an array of inputs.
-     * Checked using the option_name and all_option_names.
-     * Mainly used to add empty checkboxs and radio buttons as they aren't passed in $_POST. And cause validation issues when missing.
+     * Check all inputs exist in an array of inputs prior to validation.
+     * Used to add empty checkboxes and radio buttons as they aren't passed in $_POST.
+     * When working with an option_name saved as an array this causes a problem as they are missing from $input.
+     * Not a problem for single options as empty checkboxes and radio buttons don't exist in $_POST at all and are set as a NULL $input.
      * Also remove any additonal inputs that may have been maliciously added.
-     * MAY NEED SOME IMPROVEMENT.
      *
      * @param     str       $option_name
      * @param     arr       $all_option_names

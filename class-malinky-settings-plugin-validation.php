@@ -34,7 +34,7 @@ class Malinky_Settings_Plugin_Validation
 	 * @return 	str   
 	 */
 	public function malinky_settings_validation_required($input, $saved_input, $option_name, $option_title)
-	{
+	{	
 
 		if ( empty($input) ) {
 

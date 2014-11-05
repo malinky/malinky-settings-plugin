@@ -21,7 +21,9 @@ class Malinky_Settings_Plugin_Field_Types
 
 		} else {
 
-			echo '<input type="text" id="' . $args['option_id'] . '" name="' . $args['option_name'] . '" value="' . esc_attr(get_option( $args['option_name'] ) ) . '" />';
+			$option = get_option($args['option_name']);
+
+			echo '<input type="text" id="' . $args['option_id'] . '" name="' . $args['option_name'] . '" value="' . esc_attr( $option ) . '" />';
 
 		}
 		
@@ -47,7 +49,9 @@ class Malinky_Settings_Plugin_Field_Types
 
 		} else {
 
-			echo '<textarea rows="4" cols="50" id="' . $args['option_id'] . '" name="' . $args['option_name'] . '"/>' . esc_attr(get_option( $args['option_name'] ) ) . '</textarea>';
+			$option = get_option($args['option_name']);
+
+			echo '<textarea rows="4" cols="50" id="' . $args['option_id'] . '" name="' . $args['option_name'] . '"/>' . esc_attr( $option ) . '</textarea>';
 
 		}
 		
@@ -74,11 +78,13 @@ class Malinky_Settings_Plugin_Field_Types
 
 				$options = get_option($args['option_name']);
 
-				echo '<input type="radio" id="' . $args['option_id'] . '" name="' . $args['option_name'] . '[' . $args['option_id'] . ']" value="' . esc_attr( $value ) . '"' . ( isset($options[$args['option_id']]) && $options[$args['option_id']] == $value ? 'checked' : '' ) . '/>' . esc_html( $value );
+				echo '<input type="radio" id="' . $args['option_id'] . '" name="' . $args['option_name'] . '[' . $args['option_id'] . ']" value="' . esc_attr( $value ) . '"' . ( isset($options[$args['option_id']]) && $options[$args['option_id']] == $value ? checked( $options[$args['option_id']], $value, false ) : '' ) . '/>' . esc_html( $value );
 
 			} else {
 
-				echo '<input type="radio" id="' . $args['option_id'] . '" name="' . $args['option_name'] . '" value="' . esc_attr( $value ) . '"' . ( get_option( $args['option_name'] ) == $value ? 'checked' : '' ) . '/>' . esc_html( $value );
+				$option = get_option($args['option_name']);
+
+				echo '<input type="radio" id="' . $args['option_id'] . '" name="' . $args['option_name'] . '" value="' . esc_attr( $value ) . '"' . checked( $option, $value, false ) . '/>' . esc_html( $value );
 
 			}
 
@@ -88,13 +94,40 @@ class Malinky_Settings_Plugin_Field_Types
 
 
 	/**
-	 * Output a CHECKBOX.
+	 * Output a SINGLE CHECKBOX.
 	 * If $args['grouped_option']) is true then option_values will be an array.
 	 *
 	 * @param 	arr $args See malinky_settings_add_fields() method.
 	 * @return 	void   
 	 */
 	public function malinky_settings_checkbox_field_output($args)
+	{
+
+		if (isset($args['grouped_option'])) {
+
+			$options = get_option($args['option_name']);
+
+			echo '<input type="checkbox" id="' . $args['option_id'] . '" name="' . $args['option_name'] . '[' . $args['option_id'] . ']" value="1"' . ( isset( $options[$args['option_id']] ) ? checked( $options[$args['option_id']], 1, false ) : '' ) . '/>';
+
+		} else {
+
+			$option = get_option($args['option_name']);
+
+			echo '<input type="checkbox" id="' . $args['option_id'] . '" name="' . $args['option_name'] . '" value="1"' . checked( $option, 1, false ) . '/>';
+
+		}
+	
+	}
+
+
+	/**
+	 * Output MULTIPLE CHECKBOXES.
+	 * If $args['grouped_option']) is true then option_values will be an array.
+	 *
+	 * @param 	arr $args See malinky_settings_add_fields() method.
+	 * @return 	void   
+	 */
+	public function malinky_settings_checkboxes_field_output($args)
 	{
 
 		if ( ! $args['option_field_type_options'] )
@@ -113,13 +146,14 @@ class Malinky_Settings_Plugin_Field_Types
 				//Need to evaluate whether $option exists particular on initial load with setting saved.
 				$option = get_option($args['option_name']);
 
-				echo '<input type="checkbox" id="' . $args['option_id'] . '" name="' . $args['option_name'] . '[]" value="' . esc_attr( $value ) . '"' . ( !empty( $option ) && in_array( $value, get_option( $args['option_name'] ) ) ? 'checked' : '' ) . '/>' . esc_html( $value );
+				echo '<input type="checkbox" id="' . $args['option_id'] . '" name="' . $args['option_name'] . '[]" value="' . esc_attr( $value ) . '"' . ( in_array( $value, $option ) ) ? 'checked' : '' ) . '/>' . esc_html( $value );
 
 			}
 
 		}
 	
 	}
+
 
 	/**
 	 * Output SELECT OPTIONS.
