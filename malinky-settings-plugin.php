@@ -15,9 +15,9 @@
  * __construct
  * Run and Setup
  * Add Page Methods
+ * Register Setting Methods 
  * Add Section Methods
  * Add Field Methods
- * Register Setting Methods
  * Validation Methods
  * Other Methods
  * ------------------------------------------------------------------------ */
@@ -31,7 +31,7 @@ class Malinky_Settings_Plugin
      * ------------------------------------------------------------------------ */
 
     /**
-     * Option names as stored in db column option_name, avoids duplicates.
+     * Prefix option names stored in db column option_name, avoids duplicates.
      *
      * @var str
      */
@@ -80,7 +80,7 @@ class Malinky_Settings_Plugin
     private $fields = array();
 
     /**
-     * Option names as stored in db column option_name
+     * Option names stored in db column option_name
      *
      * @var arr
      */    
@@ -161,7 +161,7 @@ class Malinky_Settings_Plugin
         //Set the option_name(s) to be saved and prefix them.
         $master_args = $this->malinky_settings_set_options($master_args);
 
-        //Set up properties and trigger set up errors if any from the format of $master_args.
+        //Set up properties.
         $this->page_title               = $master_args['malinky_settings_page_title'];
         $this->menu_title               = $master_args['malinky_settings_menu_title'];
         $this->menu_slug                = Malinky_Settings_Plugin::malinky_settings_set_slug($master_args['malinky_settings_page_title'], '-');
@@ -321,9 +321,9 @@ class Malinky_Settings_Plugin
      * Set up sections, fields and register settings. Called from admin_init action in __construct.
      * Methods called from this method will call the following WP functions.
      *
+     * register_setting()
      * add_settings_section()
      * add_settings_field()
-     * register_setting()
      *
      * And their various callbacks if applicable.
      *
@@ -332,11 +332,53 @@ class Malinky_Settings_Plugin
     public function malinky_settings_section_field_setup()
     {
 
+        $this->malinky_settings_register_settings($this->option_names);
         $this->malinky_settings_add_sections($this->sections);
         $this->malinky_settings_add_fields($this->fields);
-        $this->malinky_settings_register_settings($this->option_names);
 
     }
+
+
+
+
+
+    /* ------------------------------------------------------------------------ *
+     * Register Setting Methods
+     * ------------------------------------------------------------------------ */
+
+    /**
+     * Register a setting.
+     *
+     * Existing $option_group (option pages) are general, discussion, media, reading, writing
+     * The $option_group is the same as $menu_slug, $page.
+     *
+     * @param     arr $option_names To be stored in db column option_name.
+     * @return    void    
+     */
+    public function malinky_settings_register_settings($option_names)
+    {
+
+        if ( ! $option_names )
+            return; //set up error
+
+        if ( ! is_array( $option_names ) )
+            return; //set up error
+
+        foreach ($option_names as $key => $option_name) {
+
+            //register_setting( $option_group, $option_name, $sanitize_callback );
+            //http://codex.wordpress.org/Function_Reference/register_setting
+            register_setting(
+
+                $this->menu_slug,                
+                $option_name,
+                array($this, 'malinky_settings_validation_callback')
+
+            );
+
+        }
+
+    }  
 
 
 
@@ -508,58 +550,15 @@ class Malinky_Settings_Plugin
 
 
     /* ------------------------------------------------------------------------ *
-     * Register Setting Methods
-     * ------------------------------------------------------------------------ */
-
-    /**
-     * Register a setting.
-     *
-     * Existing $option_group (option pages) are general, discussion, media, reading, writing
-     * The $option_group is the same as $menu_slug, $page.
-     *
-     * @param     arr $option_names To be stored in db column option_name.
-     * @return    void    
-     */
-    public function malinky_settings_register_settings($option_names)
-    {
-
-        if ( ! $option_names )
-            return; //set up error
-
-        if ( ! is_array( $option_names ) )
-            return; //set up error
-
-        foreach ($option_names as $key => $option_name) {
-
-            //register_setting( $option_group, $option_name, $sanitize_callback );
-            //http://codex.wordpress.org/Function_Reference/register_setting
-            register_setting(
-
-                $this->menu_slug,                
-                $option_name,
-                array($this, 'malinky_settings_validation_callback')
-
-            );
-
-        }
-
-    }            
-
-
-
-
-
-    /* ------------------------------------------------------------------------ *
      * Validation Methods
      * ------------------------------------------------------------------------ */
 
     /**
-     * Input is either a string if option is saved as a single.
-     * Or an array if option is saved as an array.
+     * Input is either a string if single saved option or array if grouped saved option.
      *
-     * The $option_name is used to find the applicable validation from $master_args
+     * $option_name is used to find the applicable validation from $master_args
      *
-     * @param 	str|arr $input String or Array of option/form values
+     * @param 	str|arr $input String or Array of form values
      * @return 	str|arr   
      */
     public function malinky_settings_validation_callback($input)
@@ -577,7 +576,8 @@ class Malinky_Settings_Plugin
         $input = $this->malinky_settings_input_whitelist($option_name, $this->all_option_names, $input);
 
         //---------------------------------------------------------------------
-        //If working with a single option_name and option_value
+        //If working with a single saved option.
+        //Also an empty single saved option of multiple checkboxes.
         //---------------------------------------------------------------------
 
         if ( !is_array ($input) ) {
@@ -614,19 +614,21 @@ class Malinky_Settings_Plugin
         }
 
         //---------------------------------------------------------------------
-        //If working with an option_name and array of option_values.
+        //If working with a grouped saved option.
         //$option_id from the $input will be the same as option_id in $master_args.
         //This $option_id represents option_name for the sake of validation.
+        //BUG HERE AS A SINGLE SAVED OPTION OF MULTIPLE CHECKBOXES WILL ENTER THIS VALIDATION AS IT IS AN ARRAY.
+        //HOWEVER $OPTION_ID WILL BE SET NUMERICALLY NOT AS option_id. THEREFORE === BELOW STOPS VALIDATION IN THIS CASE.
         //---------------------------------------------------------------------
 
         foreach ($input as $option_id => $option_value) {
 
             foreach ($this->fields as $key => $value) {
-
+                
                 //Find the correct option by comparing option_name key in $master_args with $option_name from current_filter()
                 //and option_id key in $master_args with $option_id from $input.
-                if ( ($this->fields[$key]['option_name'] == $option_name) && ($this->fields[$key]['option_id'] == $option_id) ) {
-
+                if ( ($this->fields[$key]['option_name'] == $option_name) && ($this->fields[$key]['option_id'] === $option_id) ) {
+                    
                     $option_validation = array();
                     $option_validation = $this->fields[$key]['option_validation'];
 
@@ -703,7 +705,7 @@ class Malinky_Settings_Plugin
 
     /**
      * Get all option_name(s) from db column option_name and those stored in db column option_value
-     * If options are saved as an array use option_name as key and option_id as an array of values.
+     * If grouped saved option use option_name as key and option_id as an array of values.
      *
      * @param 	arr fields See malinky_settings_add_fields() method.
      * @return 	arr   
@@ -767,7 +769,7 @@ class Malinky_Settings_Plugin
 
 
     /**
-     * Get an option stored as a single or a single option from an option stored as an array.
+     * Get single saved option or option from array of a grouped saved option.
      * $option_name will be generated from malinky_settings_get_option_functions.
      * $option_name will either contain option_name or 'option_name - option_id'.
      *
@@ -804,11 +806,11 @@ class Malinky_Settings_Plugin
 
 
     /**
-     * Check all inputs exist in an array of inputs prior to validation.
+     * Check all inputs exist in an array of inputs from a grouped saved option prior to validation.
      * Used to add empty checkboxes and radio buttons as they aren't passed in $_POST.
-     * When working with an option_name saved as an array this causes a problem as they are missing from $input.
-     * Not a problem for single options as empty checkboxes and radio buttons don't exist in $_POST at all and are set as a NULL $input.
-     * Also remove any additonal inputs that may have been maliciously added.
+     * When working with a group saved option this causes a problem as they are missing from $input.
+     * Not a problem for single saved options as empty checkboxes and radio buttons don't exist in $_POST at all and are set as a NULL $input.
+     * Also remove any additional inputs that may have been maliciously added.
      *
      * @param     str       $option_name
      * @param     arr       $all_option_names
@@ -820,7 +822,11 @@ class Malinky_Settings_Plugin
 
         $option_ids = $all_option_names[$option_name];
 
-        if ( is_array($input) ) {
+        //If $option_ids is an array then we have grouped saved options.
+        //Not just an option_name saved as an array as this could refer to a single option using multiple checkboxes.
+        if ( is_array($option_ids) ) {
+
+        //if ( is_array($input) ) {
 
             //Add missing inputs
             foreach ( $option_ids as $key => $option_id ) {
@@ -843,6 +849,8 @@ class Malinky_Settings_Plugin
                 }
 
             }            
+
+        //}
 
         }
 

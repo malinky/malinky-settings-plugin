@@ -121,7 +121,7 @@ class Malinky_Settings_Plugin_Field_Types
 
 
 	/**
-	 * Output MULTIPLE CHECKBOXES.
+	 * Output MULITPLE CHECKBOXES.
 	 * If $args['grouped_option']) is true then option_values will be an array.
 	 *
 	 * @param 	arr $args See malinky_settings_add_fields() method.
@@ -146,7 +146,8 @@ class Malinky_Settings_Plugin_Field_Types
 				//Need to evaluate whether $option exists particular on initial load with setting saved.
 				$option = get_option($args['option_name']);
 
-				echo '<input type="checkbox" id="' . $args['option_id'] . '" name="' . $args['option_name'] . '[]" value="' . esc_attr( $value ) . '"' . ( in_array( $value, $option ) ) ? 'checked' : '' ) . '/>' . esc_html( $value );
+				//Extra !empty check for first page load of plugin where a single optopn multiple check would be blank not an array.
+				echo '<input type="checkbox" id="' . $args['option_id'] . '" name="' . $args['option_name'] . '[]" value="' . esc_attr( $value ) . '"' . ( !empty( $option ) && in_array( $value, $option ) ? 'checked' : '' ) . '/>' . esc_html( $value );
 
 			}
 
@@ -188,7 +189,9 @@ class Malinky_Settings_Plugin_Field_Types
 
 			} else {
 
-				echo '<option id="' . $args['option_id'] . '" name="' . $args['option_name'] . '" value="' . esc_attr( $value ) . '"' . ( get_option( $args['option_name'] ) == $value ? 'selected' : '' ) . '/>' . esc_html( $value ) . '</option>';
+				$option = get_option($args['option_name']);
+
+				echo '<option id="' . $args['option_id'] . '" name="' . $args['option_name'] . '" value="' . esc_attr( $value ) . '"' . ( $option == $value ? 'selected' : '' ) . '/>' . esc_html( $value ) . '</option>';
 
 			}
 
@@ -217,7 +220,9 @@ class Malinky_Settings_Plugin_Field_Types
 
 		} else {
 
-			echo '<input type="color" id="' . $args['option_id'] . '" name="' . $args['option_name'] . '" value="' . esc_attr(get_option( $args['option_name'] ) ) . '" />';
+			$option = get_option($args['option_name']);
+
+			echo '<input type="color" id="' . $args['option_id'] . '" name="' . $args['option_name'] . '" value="' . esc_attr( $option ) . '" />';
 
 		}
 		
@@ -243,7 +248,9 @@ class Malinky_Settings_Plugin_Field_Types
 
 		} else {
 
-			echo '<input type="date" id="' . $args['option_id'] . '" name="' . $args['option_name'] . '" value="' . esc_attr(get_option( $args['option_name'] ) ) . '" min="' . date('Y-m-d')  . '"/>';
+			$option = get_option($args['option_name']);
+
+			echo '<input type="date" id="' . $args['option_id'] . '" name="' . $args['option_name'] . '" value="' . esc_attr( $option ) . '" min="' . date('Y-m-d')  . '"/>';
 
 		}
 		
