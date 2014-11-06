@@ -35,7 +35,7 @@ class Malinky_Settings_Plugin_Validation
 	 */
 	public function malinky_settings_validation_required($input, $saved_input, $option_name, $option_title)
 	{	
-
+		
 		if ( empty($input) ) {
 
 			$error_code 	= $option_name . '_' . str_replace('malinky_settings_validation_', '', __FUNCTION__) . '_error';
@@ -66,7 +66,7 @@ class Malinky_Settings_Plugin_Validation
 		if ( !($input) ) {
 
 			$error_code 	= $option_name . '_' . str_replace('malinky_settings_validation_', '', __FUNCTION__) . '_error';
-			$error_message 	= apply_filters('malinky_settings_validation_error_message_required', 'is required.', $error_code);
+			$error_message 	= apply_filters('malinky_settings_validation_error_message_required_checkbox', 'is required.', $error_code);
 			$this->malinky_settings_add_settings_error($option_name, $option_title, $error_code, $error_message);
 
 			return $saved_input;

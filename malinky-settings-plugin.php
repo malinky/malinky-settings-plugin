@@ -213,7 +213,7 @@ class Malinky_Settings_Plugin
         $unique_option_names     = array();
         $prefixed_option_names   = array();
 
-        //Return either option_group_name or option_title in slug format.
+        //Returns either unique option_group_name or option_title in slug format.
         $unique_option_names = $this->malinky_settings_get_option_names($master_args['malinky_settings_fields']);
 
         foreach ($unique_option_names as $key => $option_name) {
@@ -569,6 +569,7 @@ class Malinky_Settings_Plugin
         //to make option_name available in this callback as a parameter.
         $option_name = str_replace( 'sanitize_option_', '', current_filter() );
 
+        //echo $option_name; exit;
         //Get the option_value as saved in DB. Could be an array.
         $saved_value = get_option( $option_name );
 
@@ -599,7 +600,7 @@ class Malinky_Settings_Plugin
                             array( $this->validator, 'malinky_settings_validation_' . $validation_method ),
                             $input,
                             $saved_value,
-                            $option_name,
+                            $this->fields[$key]['option_id'],
                             $this->fields[$key]['option_title']
                         );
 
@@ -686,10 +687,13 @@ class Malinky_Settings_Plugin
 
             } elseif ( ! empty ( $fields[$key]['option_group_name'] ) ) {
 
+                //If option_group_name has been set we don't need this again
+                //if ( !in_array( Malinky_Settings_Plugin::malinky_settings_set_slug($fields[$key]['option_group_name']), $option_names ) )
                 $option_names[] = Malinky_Settings_Plugin::malinky_settings_set_slug($fields[$key]['option_group_name']);
 
             } else {
 
+                //Remember could have two values the same of to option_titles are the same for two single saved options.
                 $option_names[] = Malinky_Settings_Plugin::malinky_settings_set_slug($fields[$key]['option_title']);
 
             }
