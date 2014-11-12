@@ -55,8 +55,22 @@ class Malinky_Settings_Plugin
      * Slug of settings page. Used as $menu_slug, $page and $option_group
      *
      * @var str
-     */    
+     */
     public $menu_slug;
+
+    /**
+     * Slug of parent page to position settings page in the correct admin menu.
+     *
+     * @var str
+     */    
+    public $page_parent_slug;
+
+    /**
+     * If settings page is to be displayed tabbed with other menu pages then this will contain the menu_slug(s) of all tabs.
+     *
+     * @var array
+     */        
+    public $page_tabs = array();
 
     /**
      * Capability to edit settings (manage_options).
@@ -165,6 +179,9 @@ class Malinky_Settings_Plugin
         $this->page_title               = $master_args['malinky_settings_page_title'];
         $this->menu_title               = $master_args['malinky_settings_menu_title'];
         $this->menu_slug                = Malinky_Settings_Plugin::malinky_settings_set_slug( $master_args['malinky_settings_page_title'], '-' );
+        $this->page_parent_slug         = $master_args['malinky_settings_page_parent_slug'];
+        $this->page_tabs                = $master_args['malinky_settings_page_tabs'];
+        $this->page_title               = $master_args['malinky_settings_page_title'];
         $this->capability               = $master_args['malinky_settings_capability'];
         $this->sections                 = $master_args['malinky_settings_sections'];
         $this->fields                   = $master_args['malinky_settings_fields'];
@@ -271,10 +288,11 @@ class Malinky_Settings_Plugin
     public function malinky_settings_add_page()
     {
 
-        //add_options_page( $page_title, $menu_title, $capability, $menu_slug, $function );
-        //http://codex.wordpress.org/Function_Reference/add_options_page
-        add_options_page(
+        //add_submenu_page( $parent_slug, $page_title, $menu_title, $capability, $menu_slug, $function );
+        //http://codex.wordpress.org/Function_Reference/add_submenu_page
+        add_submenu_page(
 
+            $this->page_parent_slug,
             $this->page_title,
             $this->menu_title,
             $this->capability,
@@ -294,17 +312,28 @@ class Malinky_Settings_Plugin
     public function malinky_settings_add_page_output_callback()
     {
 
-        ?>
+        if ( ! current_user_can( 'manage_options' ) )
+            wp_die( 'You do not have sufficient permissions to access this page.' );
+
+        if ( $this->page_tabs ) {
+
+            echo '<h2 class="nav-tab-wrapper">';
+
+            foreach ( $this->page_tabs as $tab_slug => $tab_title ) {
+
+                echo '<a href=' . $this->page_parent_slug . '?page=' . $tab_slug . ' class="nav-tab' . ( $_GET[ 'page' ] == $tab_slug ? ' nav-tab-active' : '' ) . '">' . $tab_title . '</a>';
+
+            }
+
+            echo '</h2>';
+
+        }  else {
+
+            echo '<h2>' . esc_html( $this->page_title ) . '</h2>';
+
+        } ?>
+
         <div class="wrap">
-            <h2>My General Settings</h2>
-
-            <?php $active_tab = isset( $_GET[ 'tab' ] ) ? $_GET[ 'tab' ] : 'display_options'; ?>
-         
-            <h2 class="nav-tab-wrapper">
-                <a href="?page=my-first-page&tab=display_options" class="nav-tab <?php echo $active_tab == 'display_options' ? 'nav-tab-active' : ''; ?>">Display Options</a>
-                <a href="?page=my-first-page&tab=social_options" class="nav-tab <?php echo $active_tab == 'social_options' ? 'nav-tab-active' : ''; ?>">Social Options</a>
-            </h2>
-
             <form action="options.php" method="post">
                 <?php do_action( 'malinky_settings_page_top' ); ?>
                 <?php settings_fields( $this->menu_slug ); ?>
@@ -313,9 +342,8 @@ class Malinky_Settings_Plugin
                 <?php do_action( 'malinky_settings_page_bottom' ); ?>
             </form>
         </div>
-        <?php
 
-    }
+    <?php }
 
 
 
