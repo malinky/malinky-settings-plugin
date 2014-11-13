@@ -237,7 +237,7 @@ class Malinky_Settings_Plugin
             
             //Set $option_name as the key.
             //And prefixed (with self::$option_name_prefix) padded $option_name as value.
-            $prefixed_option_names[ $option_name ] = '_' . sprintf("%06d", self::$option_name_prefix) . '_' . $option_name;
+            $prefixed_option_names[ $option_name ] = '_' . zeroise( self::$option_name_prefix, 6 ) . '_' . $option_name;
             self::$option_name_prefix++;
 
         }
