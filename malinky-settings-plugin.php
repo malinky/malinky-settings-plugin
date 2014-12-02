@@ -1,6 +1,6 @@
 <?php
 /**
- * Plugin Name: Malinky Settings plugin
+ * Plugin Name: Malinky Settings Plugin
  * Plugin URI: https://github.com/malinky/malinky-settings-plugin
  * Description: Wordpress plugin using the Settings API to create new options pages.
  * Version: 1.0
