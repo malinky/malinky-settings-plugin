@@ -162,7 +162,7 @@ class Malinky_Settings_Plugin_Validation
 	public function malinky_settings_validation_numbers( $input, $saved_input, $option_name, $option_title )
 	{
 
-		if ( ! preg_match( '/^[0-9]*$/', $input ) ) {
+		if ( ! preg_match( '/^[0-9 ]*$/', $input ) ) {
 
 			$error_code 	= $option_name . '_' . str_replace( 'malinky_settings_validation_', '', __FUNCTION__) . '_error';
 			$error_message 	= apply_filters( 'malinky_settings_validation_error_message_numbers', 'accepts numbers only.', $error_code );
@@ -204,5 +204,32 @@ class Malinky_Settings_Plugin_Validation
 		return sanitize_email( $input );
 
 	}	
+
+
+	/**
+	 * URL field.
+	 *
+	 * @param 	str $input
+	 * @param 	str $saved_input
+	 * @param 	str $option_name
+	 * @param 	str $option_title
+	 * @return 	str   
+	 */
+	public function malinky_settings_validation_url( $input, $saved_input, $option_name, $option_title )
+	{
+
+		if ( ! preg_match( '/^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/', $input ) ) {
+
+			$error_code 	= $option_name . '_' . str_replace( 'malinky_settings_validation_', '', __FUNCTION__ ) . '_error';
+			$error_message 	= apply_filters( 'malinky_settings_validation_error_message_url', 'a valid URL is required.', $error_code );
+			$this->malinky_settings_add_settings_error( $option_name, $option_title, $error_code, $error_message );
+
+			return $saved_input;
+
+		}
+
+		return $input;
+
+	}		
 
 }
