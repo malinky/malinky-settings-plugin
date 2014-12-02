@@ -134,7 +134,6 @@ class Malinky_Settings_Plugin_Field_Types
 	}
 
 
-
 	/**
 	 * Output a RADIO BUTTON.
 	 * If $args['grouped_option']) is true then option_values will be an array.
