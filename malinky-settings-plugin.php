@@ -554,6 +554,9 @@ class Malinky_Settings_Plugin
             case 'textarea_field':
                 $this->field_types->malinky_settings_textarea_field_output( $args );
                 break;
+            case 'editor_field':
+                $this->field_types->malinky_settings_editor_field_output( $args );
+                break;                
             case 'radio_field':
                 $this->field_types->malinky_settings_radio_field_output( $args );
                 break;

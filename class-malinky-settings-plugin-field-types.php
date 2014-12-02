@@ -72,6 +72,70 @@ class Malinky_Settings_Plugin_Field_Types
 
 
 	/**
+	 * Output an EDITOR.
+	 * If $args['grouped_option']) is true then option_values will be an array.
+	 *
+	 * @param 	arr $args See malinky_settings_add_fields() method.
+	 * @return 	void   
+	 */
+	public function malinky_settings_editor_field_output( $args )
+	{
+
+		$html = '';
+
+		$editor = array(
+			'media_buttons' => false,
+			'textarea_rows' => 8,
+			'quicktags' 	=> false,
+			'tinymce' 		=> array(
+				'plugins' 						=> 'paste',
+				'paste_auto_cleanup_on_paste' 	=> true,
+				'paste_remove_styles' 			=> true,
+				'paste_text_sticky' 			=> true,
+				'paste_text_sticky_default' 	=> true,				
+				'paste_retain_style_properties' => "none",
+				'paste_strip_class_attributes' 	=> true,
+				'theme_advanced_buttons1' 		=> 'bold,italic,|,bullist,numlist,|,link,|,undo,redo,|,|,code',
+				'theme_advanced_buttons2' 		=> '',
+				'theme_advanced_buttons3' 		=> '',
+				'theme_advanced_buttons4' 		=> ''
+			),
+		);
+
+
+		if ( isset( $args['grouped_option'] ) ) {
+
+			$options = get_option( $args['option_name'] );
+
+			/*
+			 * Also set textarea_name which is used to save the data in this case as it's being stored as a group / array
+			 * Otherise wp_editor, $editor_id parameter is used but this can't use the [] in the array.
+			 * Then just use option_id as $editor_id so it's unique.
+			 * wp_editor( $content, $editor_id, $settings = array() );
+			 * http://codex.wordpress.org/Function_Reference/wp_editor
+			 */
+			$editor['textarea_name'] = $args['option_name'] . '[' . $args['option_id'] . ']';
+
+			$html .= wp_editor( ( isset( $options[ $args['option_id'] ] ) ? esc_textarea( $options[ $args['option_id'] ] ) : $args['option_default'][0] ), $args['option_id'], $editor );
+
+		} else {
+
+			$option = get_option( $args['option_name'] );
+
+			$html .= wp_editor( ( ! empty( $option ) ? esc_textarea( $option ) : $args['option_default'][0] ), $args['option_name'], $editor );
+
+		}
+		
+		if ( $args['option_description'] )
+			$html .= '<p><small>' . $args['option_description'] . '</small></p>';
+
+		echo $html;
+	
+	}
+
+
+
+	/**
 	 * Output a RADIO BUTTON.
 	 * If $args['grouped_option']) is true then option_values will be an array.
 	 *
