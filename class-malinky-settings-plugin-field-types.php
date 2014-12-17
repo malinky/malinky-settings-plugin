@@ -38,6 +38,40 @@ class Malinky_Settings_Plugin_Field_Types
 
 
 	/**
+	 * Output a PASSWORD INPUT.
+	 * If $args['grouped_option']) is true then option_values will be an array.
+	 *
+	 * @param 	arr $args See malinky_settings_add_fields() method.
+	 * @return 	void   
+	 */
+	public function malinky_settings_password_field_output( $args )
+	{
+
+		$html = '';
+
+		if ( isset( $args['grouped_option'] ) ) {
+
+			$options = get_option( $args['option_name'] );
+
+			$html .= '<input type="password" id="' . $args['option_id'] . '" name="' . $args['option_name'] . '[' . $args['option_id'] . ']" value="' . ( isset( $options[$args['option_id']]) ? esc_attr( $options[ $args['option_id'] ] ) : $args['option_default'][0] )  . '" placeholder="' . $args['option_placeholder'] . '" />';
+
+		} else {
+
+			$option = get_option( $args['option_name'] );
+
+			$html .= '<input type="password" id="' . $args['option_id'] . '" name="' . $args['option_name'] . '" value="' . ( ! empty( $option ) ? esc_attr( $option ) : $args['option_default'][0] ) . '" placeholder="' . $args['option_placeholder'] . '" />';
+
+		}
+		
+		if ( $args['option_description'] )
+			$html .= '<p><small>' . $args['option_description'] . '</small></p>';
+
+		echo $html;
+	
+	}	
+
+
+	/**
 	 * Output a TEXT AREA.
 	 * If $args['grouped_option']) is true then option_values will be an array.
 	 *

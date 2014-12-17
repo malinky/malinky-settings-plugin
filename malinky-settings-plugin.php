@@ -551,6 +551,9 @@ class Malinky_Settings_Plugin
             case 'text_field':
                 $this->field_types->malinky_settings_text_field_output( $args );
                 break;
+            case 'password_field':
+                $this->field_types->malinky_settings_password_field_output( $args );
+                break;                
             case 'textarea_field':
                 $this->field_types->malinky_settings_textarea_field_output( $args );
                 break;
