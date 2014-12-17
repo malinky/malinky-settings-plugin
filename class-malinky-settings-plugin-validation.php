@@ -273,7 +273,7 @@ class Malinky_Settings_Plugin_Validation
 	public function malinky_settings_validation_googleua( $input, $saved_input, $option_name, $option_title )
 	{
 
-		if ( ! preg_match( '/^(UA-)([0-9]{8})-([0-9]{1})$/', $input ) ) {
+		if ( $input && ! preg_match( '/^(UA-)([0-9]{8})-([0-9]{1})$/', $input ) ) {
 
 			$error_code 	= $option_name . '_' . str_replace( 'malinky_settings_validation_', '', __FUNCTION__ ) . '_error';
 			$error_message 	= apply_filters( 'malinky_settings_validation_error_message_googleua', 'a valid Google Analyitcs UA tracking number is required.', $error_code );
