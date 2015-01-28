@@ -825,7 +825,7 @@ class Malinky_Settings_Plugin
      * @param     str $option_name
      * @return    str  
      */
-    public function malinky_settings_get_option( $option_name )
+    public static function malinky_settings_get_option( $option_name )
     {
 
         //Option stored as an array.
